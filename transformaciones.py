@@ -20,6 +20,10 @@ if not RUTA.exists():
 
 NUMERICAS = [
     "TotalSteps",
+    "TotalDistance",
+    "VeryActiveDistance",
+    "ModeratelyActiveDistance",
+    "LightActiveDistance",
     "VeryActiveMinutes",
     "FairlyActiveMinutes",
     "LightlyActiveMinutes",
@@ -31,7 +35,7 @@ CATEGORICAS = ["Nivel_Pasos", "Nivel_Sedentarismo"]
 
 df = pd.read_csv(RUTA)
 X = df[NUMERICAS]
-print("Dataset limpio:", df.shape, "| Matriz numérica:", X.shape)
+print("Dataset limpio:", df.shape, "| Matriz numérica (10 vars):", X.shape)
 
 
 # 1 · POR QUÉ ESCALAR: la distancia la domina la variable con magnitudes grandes
@@ -42,7 +46,7 @@ def distancia(a, b):
 c1, c2 = X.iloc[0], X.iloc[1]
 print("\n--- Distancia entre dos registros SIN escalar ---")
 for col in NUMERICAS:
-    print(f"  {col:<22} aporta {abs(c1[col] - c2[col]):>10.1f}")
+    print(f"  {col:<26} aporta {abs(c1[col] - c2[col]):>10.1f}")
 print("Distancia total sin escalar :", round(distancia(c1, c2), 1))
 
 X_minmax = pd.DataFrame(MinMaxScaler().fit_transform(X), columns=NUMERICAS)
@@ -78,7 +82,7 @@ print("Bordes de los rangos:", bordes)
 print(pd.Series(pasos_bins).value_counts().sort_index().to_string())
 
 # 5 · REDUCCIÓN DE DIMENSIONALIDAD CON PCA
-print("\n--- PCA sobre variables estandarizadas ---")
+print("\n--- PCA sobre las 10 variables estandarizadas ---")
 pca = PCA()
 componentes = pca.fit_transform(X_std)
 razones = pca.explained_variance_ratio_
@@ -94,3 +98,8 @@ X_final = pd.concat([X_std, X_cat], axis=1)
 print("\n--- Matriz final consolidada ---")
 print("Dimensiones finales:", X_final.shape)
 print("Lista de columnas:", X_final.columns.tolist())
+
+# 6.1 · Exportación automática de la matriz procesada (X_final)
+rutaSalida = Path.cwd() / "Sensores_transformado.csv"
+X_final.to_csv(rutaSalida, index=False, encoding="utf-8")
+print("\nMatriz procesada (X_final) exportada a:", rutaSalida)
